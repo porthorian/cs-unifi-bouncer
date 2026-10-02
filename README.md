@@ -95,6 +95,24 @@ The bouncer configuration is made via environment variables:
 
 # Troubleshooting
 
+## Homelab fork: stable firewall groups
+
+This fork is based on upstream v1.4.0. It sorts the complete blocklist before
+splitting it into firewall groups and skips group writes when their membership
+has not changed. Controller membership is loaded on startup, so restarting the
+bouncer also skips unchanged group writes. Configuration options are unchanged.
+
+The first reconciliation of groups created by the upstream bouncer can move
+addresses into the sorted layout. Subsequent updates apply real decision changes
+without randomly redistributing the blocklist. This reduces new audit-log growth;
+it does not remove existing audit history or tune MongoDB.
+
+Release images are published at `ghcr.io/porthorian/cs-unifi-bouncer`. Pull requests
+and main run regression tests, static checks, and builds for Linux amd64, arm64,
+and arm without publishing. Release tags publish only after verification passes.
+The nonroot static base is pinned in `.ko.yaml`; CI also verifies that the image
+manifest actually contains all three supported architectures.
+
 ## MongoDB CPU Overload
 
 Some users have reported that the UniFi control plane becomes slow or unresponsive after running the bouncer for a while. This is caused by the UniFi controller logging every individual IP address change to the `admin_activity_log` collection in MongoDB, which can grow very large (1GB+) and cause high CPU usage (300%+).
