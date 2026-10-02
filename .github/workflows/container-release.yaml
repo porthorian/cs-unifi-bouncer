@@ -45,6 +45,7 @@ jobs:
           export SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)
           ko build --bare --push=false --oci-layout-path="$RUNNER_TEMP/bouncer-image" \
             --platform=linux/amd64,linux/arm64,linux/arm .
+          python3 scripts/verify-image-layout.py "$RUNNER_TEMP/bouncer-image"
 
   publish:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -73,11 +74,12 @@ jobs:
           export VERSION="${GITHUB_REF_NAME}"
           export SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)
           export GOFLAGS="-ldflags=-X=main.version=$VERSION"
-          ko build --bare --tags="$VERSION" \
+          ko build --bare --tags="$VERSION" --oci-layout-path="$RUNNER_TEMP/bouncer-image" \
             --platform=linux/amd64,linux/arm64,linux/arm \
             --image-label="org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
             --image-label="org.opencontainers.image.revision=$GITHUB_SHA" \
             --image-label="org.opencontainers.image.version=$VERSION" . | tee image-reference.txt
+          python3 scripts/verify-image-layout.py "$RUNNER_TEMP/bouncer-image"
           printf 'Published image: `%s`\n' "$(cat image-reference.txt)" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:

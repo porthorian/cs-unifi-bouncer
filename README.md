@@ -110,6 +110,8 @@ it does not remove existing audit history or tune MongoDB.
 Release images are published at `ghcr.io/porthorian/cs-unifi-bouncer`. Pull requests
 and main run regression tests, static checks, and builds for Linux amd64, arm64,
 and arm without publishing. Release tags publish only after verification passes.
+The nonroot static base is pinned in `.ko.yaml`; CI also verifies that the image
+manifest actually contains all three supported architectures.
 
 ## MongoDB CPU Overload
 
